@@ -1,0 +1,11 @@
+{
+  "name": "lunr-test",
+  "version": "1.0.0",
+  "description": "testing a few of lunr's features",
+  "main": "index.js",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "lunr": "^2.3.8"
+  }
+}
