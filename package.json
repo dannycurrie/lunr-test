@@ -6,6 +6,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
+    "faker": "^4.1.0",
     "lunr": "^2.3.8"
   }
 }
