@@ -21,7 +21,7 @@ const createFn = createIndex.bind(null,
 const index = measure(createFn, `building index for ${testDocs.length} documents`);
 
 const performAndMeasureSearch = (query, fields = []) => {
-  const searchFn = index.search.bind(index, sanitizeSearchInput(query));
+  const searchFn = index.search.bind(index, query);
   let results = measure(searchFn, `searching for term "${query}"`);
   printResults(results, testDocs, fields);
 }
@@ -56,7 +56,7 @@ const randomTest = () => {
   console.log(`${times} searches - average time: ${searchTime / times}ms`)
 }
 
-const search = term => performAndMeasureSearch(term, ['title', 'identifiers']);
+const search = term => performAndMeasureSearch(sanitizeSearchInput(term), ['title', 'identifiers']);
 
 const args = process.argv.slice(2);
 
