@@ -1,4 +1,5 @@
 const lunr = require('lunr');
+const { sanitizeSearchInput } = require('./utils');
 
 function initBuilder(options) {
   const builder = new lunr.Builder();
@@ -15,30 +16,36 @@ function initBuilder(options) {
       ...options.searchPipeline
     );
   }
-  options.fields.forEach(builder.field.bind(builder));
+
+  options.fields.forEach(field => {
+    builder.field(field);
+  });
+
   return builder;
+}
+
+function concatIdentifiers(identifiers) {
+  if (identifiers) {
+    return sanitizeSearchInput(
+      Object.values(identifiers).join(' ')
+    );
+  }
+  return '';
+}
+
+function processDocument(document) {
+  return {
+    ...document,
+    identifiers: concatIdentifiers(document.identifiers)
+  }
 }
 
 function createIndex(options, docs) {
   const builder = initBuilder(options);
-
-  docs.map(doc => builder.add(doc));
+  docs.map(doc => builder.add(processDocument(doc)));
   return builder.build();
-}
-
-function printResults(results, documents, fields = []) {
-  console.log(`------ ${results.length} results ------`);
-  if (fields.length) {
-    const docsMap = documents.reduce((acc, doc) => ({ ...acc, [doc.id]: doc }), {});
-    results.map(({ ref: id }) =>
-      fields.map(
-        field => console.log(`${field}: ${docsMap[id][field]}`)
-      )
-    );
-  }
 }
 
 module.exports = {
   createIndex,
-  printResults
 }

@@ -1,12 +1,12 @@
 const { performance } = require('perf_hooks');
 const lunr = require('lunr');
 const testDocs = require('./test-docs');
-const { printResults, createIndex } = require('./lunr-utils');
-const { getRandomSearchTerm, measure } = require('./utils');
+const { createIndex } = require('./lunr-utils');
+const { getRandomSearchTerm, measure, printResults, sanitizeSearchInput } = require('./utils');
 
 const createFn = createIndex.bind(null,
   {
-    fields: ['title'],
+    fields: ['title', 'identifiers'],
     pipeline: [
       lunr.trimmer,
       lunr.stopWordFilter,
@@ -21,7 +21,7 @@ const createFn = createIndex.bind(null,
 const index = measure(createFn, `building index for ${testDocs.length} documents`);
 
 const performAndMeasureSearch = (query, fields = []) => {
-  const searchFn = index.search.bind(index, query);
+  const searchFn = index.search.bind(index, sanitizeSearchInput(query));
   let results = measure(searchFn, `searching for term "${query}"`);
   printResults(results, testDocs, fields);
 }
@@ -56,17 +56,17 @@ const randomTest = () => {
   console.log(`${times} searches - average time: ${searchTime / times}ms`)
 }
 
+const search = term => performAndMeasureSearch(term, ['title', 'identifiers']);
+
 const args = process.argv.slice(2);
 
 if (args.length) {
   const arg = args[0];
 
-  switch (arg) {
-    case 'random':
-      randomTest();
-      break;
-    default:
-      console.warn('unrecognised parameter:', arg);
-  }
+  if (arg === 'random')
+    randomTest();
+  else
+    // concat args as a search term
+    search(args.join(' '))
 } else
   basicTest();

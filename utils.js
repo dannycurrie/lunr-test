@@ -17,7 +17,33 @@ function getRandomSearchTerm() {
   return faker.random.words(length);
 }
 
+function printField(doc, field) {
+  const fieldVal = doc[field];
+  if (fieldVal && typeof fieldVal === 'object')
+    console.log(JSON.stringify(fieldVal));
+  else
+    console.log(`${field}: ${fieldVal}`);
+}
+
+function printResults(results, documents, fields = []) {
+  console.log(`------ ${results.length} results ------`);
+  if (fields.length) {
+    const docsMap = documents.reduce((acc, doc) => ({ ...acc, [doc.id]: doc }), {});
+    results.map(({ ref: id }) => {
+      fields.map(
+        field => printField(docsMap[id], field)
+      )
+      console.log('---');
+    }
+    );
+  }
+}
+
+const sanitizeSearchInput = input => input.replace(/~|:|\^|\+|-/g, '');
+
 module.exports = {
   measure,
-  getRandomSearchTerm
+  getRandomSearchTerm,
+  printResults,
+  sanitizeSearchInput,
 }
